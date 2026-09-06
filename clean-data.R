@@ -14,9 +14,13 @@ source("theme-plot.R")
 #' @param doy Vector where each element corresponds to the day of the year (DOY)
 #'  of a coordinate. Values range from 1 to 365.
 #' @param half_width Window size for each year is 2 * half_width.
+#' @param n_iter Number of iterations for scale and scatter estimation.
 #'
-#' @returns Vector giving the trend for each DOY
-fit_seasonal_window <- function(coord, doy, half_width) {
+#' @returns A list giving trend for each DOY, scale for each DOY, estimated
+#'   detrended and descaled observations, Mahalanobis distances,
+#'   estimated generating variate and scatter for descaled and detrended
+#'   observations.
+fit_seasonal_window <- function(coord, doy, half_width, n_iter) {
   n_doy <- 365
 
   # Compute circular distances between DOY and DOY corresponding to an
@@ -37,6 +41,24 @@ fit_seasonal_window <- function(coord, doy, half_width) {
   # Window means
   mu_doy <- (w %*% coord) / day_window
   mu_doy
+
+  e <- coord - mu_doy[doy, ]
+  s <- rep(1, nrow(coord)) # Initial guess for the scale
+  for (i in seq_len(n_iter)) {
+    sigma <- cov(e / s)
+    sigma <- sigma / det(sigma)^(1 / ncol(coord))
+    maha_dist <- sqrt(mahalanobis(e, center = FALSE, cov = sigma))
+    s_doy <- (w %*% maha_dist) / day_window
+    s <- s_doy[doy]
+  }
+  list(
+    mu_doy = mu_doy,
+    s_doy = s_doy,
+    sigma = sigma,
+    maha_dist = maha_dist,
+    r = maha_dist / s,
+    coord_0 = e / s
+  )
 }
 
 # Delete station name column
@@ -103,23 +125,31 @@ doy <- yday(wind_cartesian$date)
 leap <- (year(wind_cartesian$date) %% 4 == 0)
 doy <- ifelse(leap & doy >= doy_leap, doy - 1L, doy)
 
-# Compute trend
+# Detrend and descale
 half_width <- 30
-mu_doy <- fit_seasonal_window(coord, doy, half_width)
+estimates <- fit_seasonal_window(coord, doy, half_width, 5)
 
 wind_cartesian <- wind_cartesian |>
-  mutate(mu_x = mu_doy[doy, 1], mu_y = mu_doy[doy, 2])
+  mutate(
+    x_0 = estimates$coord_0[, 1],
+    y_0 = estimates$coord_0[, 2],
+    mu_x = estimates$mu_doy[doy, 1],
+    mu_y = estimates$mu_doy[doy, 2],
+    scale = estimates$s_doy[doy],
+    r = estimates$r,
+    maha_dist = estimates$maha_dist
+  )
 
-# Time series plots of coordinates for a chosen period
+# Plot trend
 wind_plot <- wind_cartesian |>
-  filter(year(date) %in% 2024:2025) |>
+  filter(year(date) %in% 2025) |>
   tidyr::pivot_longer(!date, names_to = "label", values_to = "series")
 
 wind_plot |>
   filter(label %in% c("x", "mu_x")) |>
   ggplot(aes(x = date, y = series, linetype = label)) +
   geom_line() +
-  xlab("Date") +
+  xlab("Time") +
   ylab("x-coordinate") +
   scale_linetype_manual(
     values = c("x" = "dotted",  "mu_x" = "solid")
@@ -131,13 +161,26 @@ wind_plot |>
   filter(label %in% c("y", "mu_y")) |>
   ggplot(aes(x = date, y = series, linetype = label)) +
   geom_line() +
-  xlab("Date") +
+  xlab("Time") +
   ylab("y-coordinate") +
   scale_linetype_manual(
     values = c("y" = "dotted",  "mu_y" = "solid")
   )  +
   theme_plot
 ggsave("figures/y-series.pdf", dpi = 600)
+
+# Plot scale
+wind_plot |>
+  filter(label %in% c("maha_dist", "scale")) |>
+  ggplot(aes(x = date, y = series, linetype = label)) +
+  geom_line() +
+  xlab("Time") +
+  ylab("Scale") +
+  scale_linetype_manual(
+    values = c("scale" = "solid", "maha_dist" = "dotted")
+  )  +
+  theme_plot
+ggsave("figures/scale.pdf", dpi = 600)
 
 # Write data
 wind_cartesian |>
