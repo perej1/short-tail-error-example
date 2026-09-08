@@ -1,6 +1,7 @@
 library(dplyr)
 library(lubridate)
 library(ggplot2)
+library(stringr)
 source("theme-plot.R")
 
 
@@ -112,7 +113,6 @@ wind_cartesian <- wind |>
   filter(n_hours >= 20) |>
   select(-n_hours) |>
   filter(!(month(date) == 2 & day(date) == 29))
-wind_cartesian
 
 coord <- wind_cartesian |>
   select(x, y) |>
@@ -139,46 +139,86 @@ wind_cartesian <- wind_cartesian |>
     r = estimates$r,
     maha_dist = estimates$maha_dist
   )
+wind_cartesian
 
-# Plot trend
+# Data for plotting
 wind_plot <- wind_cartesian |>
-  filter(year(date) %in% 2025) |>
-  tidyr::pivot_longer(!date, names_to = "label", values_to = "series")
+  mutate(
+    year_group = case_when(
+      year(date) == 2025 ~ "selected",
+      TRUE ~ "other"
+    )) |>
+  mutate(md = as.Date(format(date, "2000-%m-%d"))) |>
+  select(-date) |>
+  tidyr::pivot_longer(
+    -c(year_group, md),
+    names_to = "label",
+    values_to = "series"
+  )
 
+# Plot x-coordinate and trend
 wind_plot |>
-  filter(label %in% c("x", "mu_x")) |>
-  ggplot(aes(x = date, y = series, linetype = label)) +
-  geom_line() +
-  xlab("Time") +
+  filter(label == "x" |  label == "mu_x") |>
+  ggplot(aes(md, series)) +
+  geom_point(
+    data = ~ filter(.x, label == "x" & year_group == "other"),
+    colour = "grey40", alpha = 0.25, size = 1
+  ) +
+  geom_line(
+    data = ~ filter(.x, label == "x" & year_group == "selected"),
+    linetype = "longdash", linewidth = 0.8
+  ) +
+  geom_line(
+    data = ~ filter(.x, label == "mu_x") |> distinct(md, series),
+    linewidth = 1
+  ) +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
   ylab("x-coordinate") +
-  scale_linetype_manual(
-    values = c("x" = "dotted",  "mu_x" = "solid")
-  )  +
+  xlab("Time") +
   theme_plot
 ggsave("figures/x-series.pdf", dpi = 600)
 
+# Plot y-coordinate and trend
 wind_plot |>
-  filter(label %in% c("y", "mu_y")) |>
-  ggplot(aes(x = date, y = series, linetype = label)) +
-  geom_line() +
-  xlab("Time") +
+  filter(label == "y" |  label == "mu_y") |>
+  ggplot(aes(md, series)) +
+  geom_point(
+    data = ~ filter(.x, label == "y" & year_group == "other"),
+    colour = "grey40", alpha = 0.25, size = 1
+  ) +
+  geom_line(
+    data = ~ filter(.x, label == "y" & year_group == "selected"),
+    linetype = "longdash", linewidth = 0.8
+  ) +
+  geom_line(
+    data = ~ filter(.x, label == "mu_y") |> distinct(md, series),
+    linewidth = 1
+  ) +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
   ylab("y-coordinate") +
-  scale_linetype_manual(
-    values = c("y" = "dotted",  "mu_y" = "solid")
-  )  +
+  xlab("Time") +
   theme_plot
 ggsave("figures/y-series.pdf", dpi = 600)
 
 # Plot scale
 wind_plot |>
   filter(label %in% c("maha_dist", "scale")) |>
-  ggplot(aes(x = date, y = series, linetype = label)) +
-  geom_line() +
+  ggplot(aes(md, series)) +
+  geom_point(
+    data = ~ filter(.x, label == "maha_dist" & year_group == "other"),
+    colour = "grey40", alpha = 0.25, size = 1
+  ) +
+  geom_line(
+    data = ~ filter(.x, label == "maha_dist" & year_group == "selected"),
+    linetype = "longdash", linewidth = 0.8
+  ) +
+  geom_line(
+    data = ~ filter(.x, label == "scale") |> distinct(md, series),
+    linewidth = 1
+  ) +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
   xlab("Time") +
   ylab("Scale") +
-  scale_linetype_manual(
-    values = c("scale" = "solid", "maha_dist" = "dotted")
-  )  +
   theme_plot
 ggsave("figures/scale.pdf", dpi = 600)
 
