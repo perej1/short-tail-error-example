@@ -5,6 +5,10 @@ library(stringr)
 library(optparse)
 source("theme-plot.R")
 
+# 1. Compute cartesian coordinates
+# 2. Detrend and descale data
+# 3. Plot data with trend (a chosen year is highlighted)
+# 4. Plot data with scale (a chosen year is highlighted)
 
 # Parse arguments
 args <- OptionParser() |>
@@ -14,7 +18,7 @@ args <- OptionParser() |>
              help = "Window size = half_width *  2 for trend and scale") |>
   parse_args()
 
-# For all the saved data, the file is named according to the arguments
+# For all the figures, the file is named according to the arguments
 file_arg <- str_interp("_y-${year_group}_w-${half_width}", args)
 
 #' Compute seasonal trend
@@ -235,5 +239,6 @@ wind_plot |>
 ggsave(str_c("figures/scale", file_arg, ".pdf"), dpi = 600)
 
 # Write data
+file_arg <- str_interp("_w-${half_width}", args)
 wind_cartesian |>
   readr::write_csv(str_c("data/cartesian-wind", file_arg, ".csv"))

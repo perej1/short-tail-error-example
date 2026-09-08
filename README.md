@@ -22,9 +22,10 @@ license:
 
 ## Cleaned data
 
-We translate the wind coordinates from polar to cartesian. That is, the
-transformed coordinates are wind vectors, where the length of the vector
-represents speed and directions are given on the below table.
+All the cleaning steps are done by the script `clean-data.R` First, we translate
+the wind coordinates from polar to cartesian. That is, the transformed
+coordinates are wind vectors, where the length of the vector represents speed
+and directions are given on the below table.
 
 (x,y)-direction  | Wind direction |
 | ------------- | ------------- |
@@ -33,5 +34,32 @@ represents speed and directions are given on the below table.
 | Positive x-direction  | Wind from west to east |
 | Negative x-direction  | Wind from east to west |
 
-After transformation to cartesian coordinates, the hourly data is averaged to
-daily level. The cleaned data is in the file `cartesian-wind.csv`.
+After the transformation to cartesian coordinates, the hourly data is averaged
+to daily level for both coordinates (columns `x`  and `y`) on files of the
+format `data/cartesian-wind_w-<half_width>.csv`.
+
+For the Cartesian coordinates we suppose the model $(x,y)^T = \mu(t) + s(t)
+\cdot (x_0,y_0)^T$, where
+
+- $\mu:\mathbb{R}\to \mathbb{R}^{2}$ is a trend
+function,
+
+- $s:\mathbb{R}\to \mathbb{R}$ is a scale function, and
+
+- $(x_0,y_0)^T$ is elliptically distributed with zero location $\mu_0 = 0$,
+scatter $\Sigma$ with $\mathrm{det}(\Sigma) = 1$, and generating variate
+$\mathcal{R}$ with $\mathbb{E}(\mathcal{R}) = 1$.
+
+We assume that both the trend and the scale depend on the day of the year. That
+is, for each year the estimated trend and scale are the same. The trend and the
+scale are estimated nonparametrically, and the estimates depend on the chosen
+window size for the pooled rolling averages. Detrended and descaled coordinates
+are on the columns `x_0` and `y_0` of the file
+`data/cartesian-wind_w-<half_width>.csv` corresponding to a chosen window width.
+Additionally, the files `data/cartesian-wind_w-<half_width>.csv` include
+additional information such as the approximated observations of the generating
+variate corresponding to the data `(x_0,  y_0)`.
+
+Lastly, `clean-data.R` plots the estimated trend and scale with the data. Data
+for a selected year is highlighted in the figures. For the chosen parameter
+values of the window width and highlighted year, see `clean-data.sh`.
