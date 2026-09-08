@@ -236,4 +236,4 @@ ggsave(str_c("figures/scale", file_arg, ".pdf"), dpi = 600)
 
 # Write data
 wind_cartesian |>
-  readr::write_csv(str_c("data/cartesian-wind", file_arg,  ".csv"))
+  readr::write_csv(str_c("data/cartesian-wind", file_arg, ".csv"))
