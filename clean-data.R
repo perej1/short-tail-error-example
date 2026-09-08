@@ -2,8 +2,20 @@ library(dplyr)
 library(lubridate)
 library(ggplot2)
 library(stringr)
+library(optparse)
 source("theme-plot.R")
 
+
+# Parse arguments
+args <- OptionParser() |>
+  add_option(c("-y", "--year_group"), type = "integer", default = 2025,
+             help = "Year to highlight in time series plots") |>
+  add_option(c("-w", "--half_width"), type = "integer", default = 30,
+             help = "Window size = half_width *  2 for trend and scale") |>
+  parse_args()
+
+# For all the saved data, the file is named according to the arguments
+file_arg <- str_interp("_y-${year_group}_w-${half_width}", args)
 
 #' Compute seasonal trend
 #'
@@ -126,8 +138,7 @@ leap <- (year(wind_cartesian$date) %% 4 == 0)
 doy <- ifelse(leap & doy >= doy_leap, doy - 1L, doy)
 
 # Detrend and descale
-half_width <- 30
-estimates <- fit_seasonal_window(coord, doy, half_width, 5)
+estimates <- fit_seasonal_window(coord, doy, args$half_width, 5)
 
 wind_cartesian <- wind_cartesian |>
   mutate(
@@ -145,7 +156,7 @@ wind_cartesian
 wind_plot <- wind_cartesian |>
   mutate(
     year_group = case_when(
-      year(date) == 2025 ~ "selected",
+      year(date) == args$year_group ~ "selected",
       TRUE ~ "other"
     )) |>
   mutate(md = as.Date(format(date, "2000-%m-%d"))) |>
@@ -176,7 +187,8 @@ wind_plot |>
   ylab("x-coordinate") +
   xlab("Time") +
   theme_plot
-ggsave("figures/x-series.pdf", dpi = 600)
+str_interp("figures/x-series_y-${year_group}_w-${half_width}.pdf", args)
+ggsave(str_c("figures/x-series", file_arg, ".pdf"), dpi = 600)
 
 # Plot y-coordinate and trend
 wind_plot |>
@@ -198,7 +210,7 @@ wind_plot |>
   ylab("y-coordinate") +
   xlab("Time") +
   theme_plot
-ggsave("figures/y-series.pdf", dpi = 600)
+ggsave(str_c("figures/y-series", file_arg, ".pdf"), dpi = 600)
 
 # Plot scale
 wind_plot |>
@@ -220,8 +232,8 @@ wind_plot |>
   xlab("Time") +
   ylab("Scale") +
   theme_plot
-ggsave("figures/scale.pdf", dpi = 600)
+ggsave(str_c("figures/scale", file_arg, ".pdf"), dpi = 600)
 
 # Write data
 wind_cartesian |>
-  readr::write_csv("data/cartesian-wind.csv")
+  readr::write_csv(str_c("data/cartesian-wind", file_arg,  ".csv"))
