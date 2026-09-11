@@ -58,7 +58,7 @@ are on the columns `x_0` and `y_0` of the file
 `data/cartesian-wind_w-<half_width>.csv` corresponding to a chosen window width.
 Additionally, the files `data/cartesian-wind_w-<half_width>.csv` include
 additional information such as the approximated observations of the generating
-variate corresponding to the data `(x_0,  y_0)`.
+variate corresponding to the data `(x_0, y_0)`.
 
 Lastly, `clean-data.R` plots the estimated trend and scale with the data. Data
 for a selected year is highlighted in the figures. For the chosen parameter

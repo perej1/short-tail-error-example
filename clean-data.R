@@ -191,7 +191,6 @@ wind_plot |>
   ylab("x-coordinate") +
   xlab("Time") +
   theme_plot
-str_interp("figures/x-series_y-${year_group}_w-${half_width}.pdf", args)
 ggsave(str_c("figures/x-series", file_arg, ".pdf"), dpi = 600)
 
 # Plot y-coordinate and trend
