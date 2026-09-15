@@ -4,7 +4,7 @@ library(optparse)
 library(stringr)
 library(dplyr)
 
-# Constants and functions
+# Global constants and functions
 
 # My plot theme for ggplot2
 theme_plot <- theme_minimal() +

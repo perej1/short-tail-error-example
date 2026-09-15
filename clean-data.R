@@ -232,7 +232,16 @@ wind_plot |>
   theme_plot
 ggsave(str_c("figures/scale", file_arg, ".pdf"), dpi = 600)
 
-# Write data
+# Plot transformed data
+wind_cartesian |>
+  ggplot(aes(x = x_0, y = y_0)) +
+  geom_point(colour = "grey40", alpha = 0.25, size = 1) +
+  xlab("x-coordinate") +
+  ylab("y-coordinate") +
+  theme_plot
 file_arg <- str_interp("_w-${half_width}", args)
+ggsave(str_c("figures/scatter", file_arg, ".pdf"), dpi = 600)
+
+# Write data
 wind_cartesian |>
   readr::write_csv(str_c("data/cartesian-wind", file_arg, ".csv"))
