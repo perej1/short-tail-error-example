@@ -1,9 +1,4 @@
-library(dplyr)
-library(lubridate)
-library(ggplot2)
-library(stringr)
-library(optparse)
-source("theme-plot.R")
+source("functions.R")
 
 # 1. Compute cartesian coordinates
 # 2. Detrend and descale data
