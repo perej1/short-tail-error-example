@@ -165,23 +165,21 @@ args <- OptionParser() |>
              help = "Window size = half_width *  2 for trend and scale") |>
   parse_args()
 
-args
-
 wind <- readr::read_csv(
   str_interp("data/cartesian-wind_w-${half_width}.csv", args),
   col_names = TRUE,
   col_types = str_flatten(c("D", rep("d", 9)))
 )
 
-wind_scaled <- wind |>
-  select(x_0, y_0) |>
-  as.matrix()
+# Thinned data
+wind_thin <- wind |>
+  slice(seq(1, n(), by = 7))
 
-mu_est <- colMeans(wind_scaled)
-sigma_est <- cov(wind_scaled)
-p <- 1 / nrow(wind_scaled)
-k <- sqrt(nrow(wind_scaled))
-estimate <- elliptical_extreme_qregion(wind_scaled, mu_est, sigma_est, k, p,
-                                       1000)
-plot(estimate$region)
-points(wind_scaled)
+# Compute autocorrelations
+tibble::tibble(
+  x_0 = as.vector(acf(wind$x_0, plot = FALSE, lag.max = 30)$acf),
+  y_0 = as.vector(acf(wind$y_0, plot = FALSE, lag.max = 30)$acf),
+  x_0_thin = as.vector(acf(wind_thin$x_0, plot = FALSE, lag.max = 30)$acf),
+  y_0_thin = as.vector(acf(wind_thin$y_0, plot = FALSE, lag.max = 30)$acf)
+) |>
+  readr::write_csv(str_interp("results/acf_w-${half_width}.csv", args))
