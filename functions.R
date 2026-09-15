@@ -155,7 +155,7 @@ estimate_quantile <- function(data_inc, n, k, p) {
 #'   from the boundary of the quantile region, 2. estimated (1 - p)-quantile of
 #'   the generating variate, 3. estimated extreme value index for the elliptical
 #'   distribution.
-elliptical_extreme_qregion <- function(data, mu_est, sigma_est, k, p, m_angle) {
+estimate_qregion <- function(data, mu_est, sigma_est, k, p, m_angle) {
   n <- nrow(data)
   d <- ncol(data)
   w <- get_ball_mesh(d, m_angle)$cartesian

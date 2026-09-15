@@ -5,6 +5,8 @@ source("functions.R")
 args <- OptionParser() |>
   add_option(c("-w", "--half_width"), type = "integer", default = 30,
              help = "Window size = half_width *  2 for trend and scale") |>
+  add_option(c("-k", "--k"), type = "integer", default = 10,
+             help = "Threshold for the number of tail observations") |>
   parse_args()
 
 wind <- readr::read_csv(
