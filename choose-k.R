@@ -26,14 +26,13 @@ gamma_for_k <- tibble::tibble(
   k = 100:3000,
   gamma = purrr::map_dbl(k, ~ estimate_gamma(radius_inc, nrow(data), .))
 )
-readr::write_csv(gamma_for_k, str_c("results/cartesian-wind", file_arg, ".csv"))
+readr::write_csv(
+  gamma_for_k,
+  str_c("results/k-cartesian-wind", file_arg, ".csv")
+)
 
 ggplot(gamma_for_k, aes(x = k, y = gamma)) +
   geom_line() +
   ylab("Estimate of the extreme value index") +
   theme_plot
 ggsave(str_c("figures/k", file_arg, ".pdf"), dpi = 600)
-
-
-
-

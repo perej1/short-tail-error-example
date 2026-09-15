@@ -14,7 +14,7 @@ args <- OptionParser() |>
   parse_args()
 
 # For all the figures, the file is named according to the arguments
-file_arg <- str_interp("_y-${year_group}_w-${half_width}", args)
+file_arg <- str_interp("_year-${year_group}_w-${half_width}", args)
 
 #' Compute seasonal trend
 #'
@@ -186,7 +186,7 @@ wind_plot |>
   ylab("x-coordinate") +
   xlab("Time") +
   theme_plot
-ggsave(str_c("figures/x-series", file_arg, ".pdf"), dpi = 600)
+ggsave(str_c("figures/mu_x", file_arg, ".pdf"), dpi = 600)
 
 # Plot y-coordinate and trend
 wind_plot |>
@@ -208,7 +208,7 @@ wind_plot |>
   ylab("y-coordinate") +
   xlab("Time") +
   theme_plot
-ggsave(str_c("figures/y-series", file_arg, ".pdf"), dpi = 600)
+ggsave(str_c("figures/mu_y", file_arg, ".pdf"), dpi = 600)
 
 # Plot scale
 wind_plot |>
