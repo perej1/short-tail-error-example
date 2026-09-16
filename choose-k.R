@@ -2,7 +2,7 @@ source("functions.R")
 
 # Parse arguments
 args <- OptionParser() |>
-  add_option(c("-w", "--half_width"), type = "integer", default = 30,
+  add_option(c("-w", "--half_width"), type = "integer", default = 15,
              help = "Window size = half_width *  2 for trend and scale") |>
   parse_args()
 
@@ -36,3 +36,7 @@ ggplot(gamma_for_k, aes(x = k, y = gamma)) +
   ylab("Estimate of the extreme value index") +
   theme_plot
 ggsave(str_c("figures/k", file_arg, ".pdf"), dpi = 600)
+
+gamma_neg <- all(gamma_for_k$gamma < 0)
+gamma_neg
+cli::cli_alert_info("All estimates of gamma negative? {gamma_neg}")
