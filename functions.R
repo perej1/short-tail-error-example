@@ -1,8 +1,8 @@
-library(lubridate)
+suppressPackageStartupMessages(library(lubridate))
 library(ggplot2)
 library(optparse)
 library(stringr)
-library(dplyr)
+suppressPackageStartupMessages(library(dplyr))
 
 # Global constants and functions
 
