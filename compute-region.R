@@ -70,7 +70,19 @@ d <- abs(yday(wind$date) - day_max)
 wind_max_window <- wind |>
   mutate(in_window = (pmin(d, 365 - d) <= half_width)) |>
   filter(in_window == TRUE) |>
-  select(date, x, y)
+  select(date, x, y) |>
+  mutate(
+    maha_d = mahalanobis(
+      x = bind_cols(x, y),
+      center = mu_min,
+      cov = scale_max * sigma_est
+    ),
+    label = if_else(maha_d == max(maha_d), "max", "other")
+  )
+
+wind_max_window |> filter(label == "max")
+
+wind_max_window |> filter(label == TRUE)
 
 # Points close to calm day
 day_min <- wind_min |> pull(date) |> yday()
@@ -81,19 +93,26 @@ wind_min_window <- wind |>
   filter(in_window == TRUE) |>
   select(date, x, y)
 
+
+
 # Plotting
 axislim <- c(-15, 15)
 ggplot() +
   geom_path(data = region_max, aes(x = x, y = y, linetype = label)) +
   geom_point(
     data = wind_max_window,
-    aes(x = x, y = y),
-    colour = "grey40",
-    alpha = 0.5,
-    size = 1.5
-  ) +
+    aes(x = x, y = y, shape = label, colour = label, size = label)) +
   scale_linetype_manual(
     values = c("inner" = "solid", "outer" = "dashed")
+  ) +
+  scale_shape_manual(
+    values = c("other" = 16, "max" = 4)
+  ) +
+  scale_size_manual(
+    values = c("other" = 1, "max" = 4)
+  ) +
+  scale_colour_manual(
+    values = c("other" = "blue", "max" = "black")
   ) +
   coord_equal(xlim = axislim, ylim = axislim) +
   theme_plot
