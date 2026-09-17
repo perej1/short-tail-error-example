@@ -1,5 +1,9 @@
 source("functions.R")
 
+# 1. Compute autocorrelation for original and thinned data
+# 2. Compute gamma estimates for various values of k for original and thinned
+# data
+
 # Parse arguments
 args <- OptionParser() |>
   add_option(c("-w", "--half_width"), type = "integer", default = 15,

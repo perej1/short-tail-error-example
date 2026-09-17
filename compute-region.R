@@ -77,7 +77,7 @@ wind_max_window <- wind |>
   select(date, x, y) |>
   mutate(
     maha_d = mahalanobis(
-      x = bind_cols(x, y),
+      x = bind_cols(x, y, .name_repair = ~ c("x", "y")),
       center = mu_max,
       cov = scale_max * sigma_est
     ),
@@ -95,7 +95,7 @@ wind_min_window <- wind |>
   select(date, x, y) |>
   mutate(
     maha_d = mahalanobis(
-      x = bind_cols(x, y),
+      x = bind_cols(x, y, .name_repair = ~ c("x", "y")),
       center = mu_min,
       cov = scale_min * sigma_est
     ),

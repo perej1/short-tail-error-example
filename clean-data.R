@@ -4,6 +4,7 @@ source("functions.R")
 # 2. Detrend and descale data
 # 3. Plot data with trend (a chosen year is highlighted)
 # 4. Plot data with scale (a chosen year is highlighted)
+# 5. Plot standardized data
 
 # Parse arguments
 args <- OptionParser() |>
@@ -52,7 +53,6 @@ fit_seasonal_window <- function(coord, doy, half_width, n_iter) {
 
   # Window means
   mu_doy <- (w %*% coord) / day_window
-  mu_doy
 
   e <- coord - mu_doy[doy, ]
   s <- rep(1, nrow(coord)) # Initial guess for the scale
@@ -102,7 +102,6 @@ wind <- readr::read_csv(
   filter(direction >= 1  & direction <= 360) |>
   mutate(date = make_date(year, month, day)) |>
   select(date, speed, direction)
-wind
 
 # Transformation to cartesian coordinates
 # Compute daily averages of the wind coordinates
@@ -149,7 +148,6 @@ wind_cartesian <- wind_cartesian |>
     r = estimates$r,
     maha_dist = estimates$maha_dist
   )
-wind_cartesian
 
 # Data for plotting
 wind_plot <- wind_cartesian |>
@@ -157,7 +155,8 @@ wind_plot <- wind_cartesian |>
     year_group = case_when(
       year(date) == args$year_group ~ "selected",
       TRUE ~ "other"
-    )) |>
+    )
+  ) |>
   mutate(md = as.Date(format(date, "2000-%m-%d"))) |>
   select(-date) |>
   tidyr::pivot_longer(
