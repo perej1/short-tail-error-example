@@ -55,16 +55,8 @@ $\mathcal{R}$ with $\mathbb{E}(\mathcal{R}) = 1$.
 We assume that both the trend and the scale depend on the day of the year. That
 is, for each year the estimated trend and scale are the same. The trend and the
 scale are estimated nonparametrically, and the estimates depend on the chosen
-window size for the pooled rolling averages. Detrended and descaled coordinates
-are on the columns `x_0` and `y_0` of the file
-`data/cartesian-wind_w-<half_width>.csv` corresponding to a chosen window width.
-Additionally, the files `data/cartesian-wind_w-<half_width>.csv` include
-additional information such as the approximated observations of the generating
-variate corresponding to the data `(x_0, y_0)`.
-
-Lastly, `clean-data.R` plots the estimated trend and scale with the data. Data
-for a selected year is highlighted in the figures. For the chosen parameter
-values of the window width and highlighted year, see `clean-data.sh`.
+window size for the pooled rolling averages. Scatter plot of the standardized
+coordinates $(x_0, y_0)^T$, and the estimated trend and scale are plotted. 
 
 ## Analysis of the data
 
