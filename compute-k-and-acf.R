@@ -65,24 +65,14 @@ readr::write_csv(
   str_c("results/k-cartesian-wind-thin", file_arg, ".csv")
 )
 
-
 ggplot(gamma_for_k, aes(x = k, y = gamma)) +
   geom_line() +
   ylab("Estimate of the extreme value index") +
   theme_plot
 ggsave(str_c("figures/k", file_arg, ".pdf"), dpi = 600)
 
-gmin <- round(min(gamma_for_k$gamma), 2)
-gmax <- round(max(gamma_for_k$gamma), 2)
-cli::cli_alert_info("Range of gamma estimates ({gmin}, {gmax})")
-
-
 ggplot(gamma_for_k_thin, aes(x = k, y = gamma)) +
   geom_line() +
   ylab("Estimate of the extreme value index") +
   theme_plot
 ggsave(str_c("figures/k_thin", file_arg, ".pdf"), dpi = 600)
-
-gmin <- round(min(gamma_for_k_thin$gamma), 2)
-gmax <- round(max(gamma_for_k_thin$gamma), 2)
-cli::cli_alert_info("Range of gamma estimates (thinned): ({gmin}, {gmax})")

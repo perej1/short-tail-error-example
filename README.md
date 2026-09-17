@@ -1,5 +1,7 @@
 # short-tail-error-example
-Illustrations for a paper about inference with contaminated (short-tailed) extremes
+
+Empirical example about wind extremes. More precisely, elliptical extreme
+quantile regions are computed for wind vectors.
 
 ## Original data
 
@@ -63,3 +65,23 @@ variate corresponding to the data `(x_0, y_0)`.
 Lastly, `clean-data.R` plots the estimated trend and scale with the data. Data
 for a selected year is highlighted in the figures. For the chosen parameter
 values of the window width and highlighted year, see `clean-data.sh`.
+
+## Analysis of the data
+
+The script `compute-k-and-acf.R` estimates the extreme value index of the
+generating variate for various values of $k$. Furthermore, autocorrelation
+function (acf) is computed. Original data has short-term dependency, and thus,
+as a robustness check estimation and acf steps are repeated for thinned data
+(every seventh day).
+
+The script `compute-region.R` estimates extreme quantile regions for days $t$
+with minimum and maximum estimates of $s(t)$ with chosen parameters.
+
+## Running the empirical example
+
+Cleaning of the data and analysis with chosen parameters is performed by running
+the following.
+
+```
+bash main.sh
+```
