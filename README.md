@@ -6,9 +6,9 @@ quantile regions are computed for wind vectors.
 ## Original data
 
 The original data set `data/raw-wind.csv` is sourced from the [Finnish
-Meteorological Institute](https://en.ilmatieteenlaitos.fi/open-data), and it is
-provided under the [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
-license:
+Meteorological Institute](https://www.ilmatieteenlaitos.fi/havaintojen-lataus),
+and it is provided under the [CC BY
+4.0](https://creativecommons.org/licenses/by/4.0/) license:
 
 - Retrieved on 3 September 2026
 

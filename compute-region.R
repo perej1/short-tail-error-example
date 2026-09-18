@@ -22,7 +22,7 @@ data <- wind |>
   as.matrix()
 mu_est <- c(0, 0)
 sigma_est <- cov(data)
-p <- c(0.01, 1 / (2 * nrow(data)))
+p <- c(1 / nrow(data), 1 / (2 * nrow(data)))
 
 inner <- estimate_qregion(data, mu_est, sigma_est, k, p[1], m_angle)
 outer <- estimate_qregion(data, mu_est, sigma_est, k, p[2], m_angle)
