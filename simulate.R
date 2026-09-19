@@ -1,5 +1,7 @@
 source("functions.R")
 
+# Boxplots of normalized errors in various scenarios
+
 #' Generate sample from an elliptical distribution
 #'
 #' Location is zero, scatter is identity and generating variate is beta
@@ -26,14 +28,14 @@ sample_elliptical <- function(n, gamma) {
 }
 
 
-#' Divisor for the errors
+#' Normalization for the errors
 #'
 #' @param n Integer, sample size.
 #' @param k Integer, threshold for tail observations.
 #' @param p Double, probability corresponding to the (1-p)-quantile.
 #' @param gamma Integer, extreme value index.
 #'
-#' @returns Double giving the divisor.
+#' @returns Double giving the divisor for the errors.
 standardize <- function(n, k, p, gamma) {
   x1 <- n / k
   x2 <- k / (n * p)
@@ -59,7 +61,7 @@ standardize <- function(n, k, p, gamma) {
 #' @returns Tibble, each column has m errors corresponding to an estimator.
 simulate <- function(m, seed, n, gamma, p, k, j, n_rounds) {
   cli::cli_alert_info("Round {j} / {n_rounds}")
-  set.seed(123)
+  set.seed(seed)
   error_er <- rep(NA, m)
   error_ee <- rep(NA, m)
   error_nr <- rep(NA, m)
@@ -79,10 +81,10 @@ simulate <- function(m, seed, n, gamma, p, k, j, n_rounds) {
 
     # Standardized errors
     q_real <- qbeta(1 - p, 1, 1 / abs(gamma))
-    error_er[i] <- abs(estimate_quantile(rsample_inc, n, k, p) - q_real) / standardize(n, k, p, gamma)
-    error_ee[i] <- abs(estimate_quantile(radius_inc, n, k, p) - q_real) / standardize(n, k, p, gamma)
-    error_nr[i] <- abs(rsample_inc[n] - q_real) / standardize(n, k, p, gamma)
-    error_ne[i] <- abs(radius_inc[n] - q_real) / standardize(n, k, p, gamma)
+    error_er[i] <- (estimate_quantile(rsample_inc, n, k, p) - q_real) / standardize(n, k, p, gamma)
+    error_ee[i] <- (estimate_quantile(radius_inc, n, k, p) - q_real) / standardize(n, k, p, gamma)
+    error_nr[i] <- (rsample_inc[n] - q_real) / standardize(n, k, p, gamma)
+    error_ne[i] <- (radius_inc[n] - q_real) / standardize(n, k, p, gamma)
   }
   tibble(
     error_er = error_er,
@@ -103,8 +105,7 @@ params <- tidyr::expand_grid(
   mutate(
     p = 1 / n,
     k = floor(n^k_exp)
-  ) |>
-  select(-k_exp)
+  )
 
 n_rounds <- nrow(params)
 params <- params |>
@@ -121,3 +122,137 @@ results <- params |>
       simulate
     )
   )
+
+
+# Plotting
+results |>
+  filter(gamma == -0.25 & k_exp == 0.3) |>
+  tidyr::unnest(simulation) |>
+  tidyr::pivot_longer(
+    cols = c(error_er, error_ee, error_nr, error_ne),
+    names_to = "method",
+    values_to = "error"
+  ) |>
+  mutate(
+    method = factor(
+      method,
+      levels = c("error_er", "error_ee", "error_nr", "error_ne")
+    )
+  ) |>
+  ggplot(aes(x = factor(n), y = error, fill = method)) +
+  geom_boxplot(
+    position = position_dodge(width = 0.8),
+    width = 0.7
+  ) +
+  scale_fill_manual(
+    values = c(
+      error_er = "steelblue",
+      error_ee = "tomato",
+      error_nr = "goldenrod",
+      error_ne = "white"
+    )
+  ) +
+  geom_hline(yintercept = 0) +
+  xlab("Sample size") +
+  ylab("Normalized error") +
+  theme_plot
+ggsave("figures/small_gamma_small_k.pdf", dpi = 600)
+
+results |>
+  filter(gamma == -0.25 & k_exp == 0.6) |>
+  tidyr::unnest(simulation) |>
+  tidyr::pivot_longer(
+    cols = c(error_er, error_ee, error_nr, error_ne),
+    names_to = "method",
+    values_to = "error"
+  ) |>
+  mutate(
+    method = factor(
+      method,
+      levels = c("error_er", "error_ee", "error_nr", "error_ne")
+    )
+  ) |>
+  ggplot(aes(x = factor(n), y = error, fill = method)) +
+  geom_boxplot(
+    position = position_dodge(width = 0.8),
+    width = 0.7
+  ) +
+  scale_fill_manual(
+    values = c(
+      error_er = "steelblue",
+      error_ee = "tomato",
+      error_nr = "goldenrod",
+      error_ne = "white"
+    )
+  ) +
+  geom_hline(yintercept = 0) +
+  xlab("Sample size") +
+  ylab("Normalized error") +
+  theme_plot
+ggsave("figures/small_gamma_large_k.pdf", dpi = 600)
+
+results |>
+  filter(gamma == -0.75 & k_exp == 0.3) |>
+  tidyr::unnest(simulation) |>
+  tidyr::pivot_longer(
+    cols = c(error_er, error_ee, error_nr, error_ne),
+    names_to = "method",
+    values_to = "error"
+  ) |>
+  mutate(
+    method = factor(
+      method,
+      levels = c("error_er", "error_ee", "error_nr", "error_ne")
+    )
+  ) |>
+  ggplot(aes(x = factor(n), y = error, fill = method)) +
+  geom_boxplot(
+    position = position_dodge(width = 0.8),
+    width = 0.7
+  ) +
+  scale_fill_manual(
+    values = c(
+      error_er = "steelblue",
+      error_ee = "tomato",
+      error_nr = "goldenrod",
+      error_ne = "white"
+    )
+  ) +
+  geom_hline(yintercept = 0) +
+  xlab("Sample size") +
+  ylab("Normalized error") +
+  theme_plot
+ggsave("figures/large_gamma_small_k.pdf", dpi = 600)
+
+results |>
+  filter(gamma == -0.75 & k_exp == 0.6) |>
+  tidyr::unnest(simulation) |>
+  tidyr::pivot_longer(
+    cols = c(error_er, error_ee, error_nr, error_ne),
+    names_to = "method",
+    values_to = "error"
+  ) |>
+  mutate(
+    method = factor(
+      method,
+      levels = c("error_er", "error_ee", "error_nr", "error_ne")
+    )
+  ) |>
+  ggplot(aes(x = factor(n), y = error, fill = method)) +
+  geom_boxplot(
+    position = position_dodge(width = 0.8),
+    width = 0.7
+  ) +
+  scale_fill_manual(
+    values = c(
+      error_er = "steelblue",
+      error_ee = "tomato",
+      error_nr = "goldenrod",
+      error_ne = "white"
+    )
+  ) +
+  geom_hline(yintercept = 0) +
+  xlab("Sample size") +
+  ylab("Normalized error") +
+  theme_plot
+ggsave("figures/large_gamma_large_k.pdf", dpi = 600)

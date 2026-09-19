@@ -99,7 +99,7 @@ different quantile estimators:
 2. Nonparametric estimator (largest order statistic) computed with true
    observations and approximations.
 
-Boxplots of standardized estimation errors are outputted. Simulations with the
+Boxplots of normalized estimation errors are outputted. Simulations with the
 chosen parameters can be performed by running the following.
 ```
 Rscript simulate.R
